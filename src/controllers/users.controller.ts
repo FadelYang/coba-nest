@@ -25,7 +25,7 @@ export class UsersController {
         return 'Get my Profile!'
     }
 
-    @Patch()
+    @Patch(':id')
     async updateUser(
         @Param('id', ParseIntPipe) id: number,
         @Body() UpdateUserDto: UpdateUserDto
