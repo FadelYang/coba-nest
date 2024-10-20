@@ -1,20 +1,23 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from "@nestjs/common";
+import { User } from "@prisma/client";
+import { UserService } from "src/core/services/users/users.services";
 import { CreateUserDto } from "src/modules/users/dtos/create-user.dto";
 import { LoginUserDto } from "src/modules/users/dtos/login-user.dto";
 import { UpdateUserDto } from "src/modules/users/dtos/update-user.dto";
+import { LoginResponse } from "src/modules/users/interfaces/users-login-interface";
 
 @Controller('users')
 export class UsersController {
+    constructor(private readonly userService: UserService) { }
+
     @Post('register')
-    registerUser(@Body() CreateUserDto: CreateUserDto): string {
-        console.log(CreateUserDto)
-        return 'Post User!'
+    async registerUser(@Body() createUserDto: CreateUserDto): Promise<User> {
+        return this.userService.registerUser(createUserDto)
     }
 
     @Post('login')
-    loginUser(@Body() LoginUserDto: LoginUserDto): string {
-        console.log(LoginUserDto)
-        return 'Login User!'
+    loginUser(@Body() LoginUserDto: LoginUserDto): Promise<LoginResponse> {
+        return this.userService.loginUser(LoginUserDto)
     }
 
     @Get('me')
@@ -23,16 +26,15 @@ export class UsersController {
     }
 
     @Patch()
-    updateUser(
+    async updateUser(
         @Param('id', ParseIntPipe) id: number,
         @Body() UpdateUserDto: UpdateUserDto
-    ): string {
-        console.log(UpdateUserDto);
-        return `Update User ${id}`
+    ): Promise<User> {
+        return this.userService.UpdateUser(+id, UpdateUserDto)
     }
 
     @Delete(':id')
-    deleteUser(@Param('id', ParseIntPipe) id: number): string {
-        return `Delete User ${id}`
+    async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<string> {
+        return this.userService.deleteUser(+id)
     }
 }
