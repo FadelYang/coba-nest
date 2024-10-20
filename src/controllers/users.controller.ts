@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Request } from "@nestjs/common";
 import { User } from "@prisma/client";
 import { UserService } from "src/core/services/users/users.services";
 import { CreateUserDto } from "src/modules/users/dtos/create-user.dto";
 import { LoginUserDto } from "src/modules/users/dtos/login-user.dto";
 import { UpdateUserDto } from "src/modules/users/dtos/update-user.dto";
-import { LoginResponse } from "src/modules/users/interfaces/users-login-interface";
+import { ExpressRequestWithUser } from "src/modules/users/interfaces/express-request-with-user.interface";
+import { LoginResponse, UserPayload } from "src/modules/users/interfaces/users-login-interface";
 
 @Controller('users')
 export class UsersController {
@@ -21,8 +22,8 @@ export class UsersController {
     }
 
     @Get('me')
-    me(): string {
-        return 'Get my Profile!'
+    me(@Request() req: ExpressRequestWithUser): UserPayload {
+        return req.user
     }
 
     @Patch(':id')
