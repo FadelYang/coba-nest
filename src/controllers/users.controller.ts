@@ -1,6 +1,7 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Request } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Request, UseGuards } from "@nestjs/common";
 import { User } from "@prisma/client";
 import { Public } from "src/common/decorators/public.decorator";
+import { IsMineGuard } from "src/common/is-mine.guard";
 import { UserService } from "src/core/services/users/users.services";
 import { CreateUserDto } from "src/modules/users/dtos/create-user.dto";
 import { LoginUserDto } from "src/modules/users/dtos/login-user.dto";
@@ -30,6 +31,7 @@ export class UsersController {
     }
 
     @Patch(':id')
+    @UseGuards(IsMineGuard)
     async updateUser(
         @Param('id', ParseIntPipe) id: number,
         @Body() UpdateUserDto: UpdateUserDto
@@ -38,6 +40,7 @@ export class UsersController {
     }
 
     @Delete(':id')
+    @UseGuards(IsMineGuard)
     async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<string> {
         return this.userService.deleteUser(+id)
     }
