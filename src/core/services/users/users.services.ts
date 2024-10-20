@@ -99,5 +99,23 @@ export class UserService {
         }
     }
 
-    // async deleteUser
+    async deleteUser(id: number): Promise<string> {
+        try {
+            const user = await this.prisma.user.findUniqueOrThrow({
+                where: { id }
+            })
+
+            await this.prisma.user.delete({
+                where: { id }
+            })
+
+            return `User with id ${user.id} deleted`
+        } catch (error) {
+            if (error.code === 'P2025') {
+                throw new NotFoundException(`User with id ${id} not found`)
+            }
+
+            throw new HttpException(error, 500)
+        }
+    }
 }
