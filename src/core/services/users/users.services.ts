@@ -9,6 +9,30 @@ export class UserService {
     constructor(private prisma: PrismaService) {}
 
     // async registerUser
+    async registerUser(createUserDto: CreateUserDto): Promise<User> {
+        try {
+            // Create new user using prisma client
+            const newUser = await this.prisma.user.create({
+                data: {
+                    email: createUserDto.email,
+                    password: await hash(createUserDto.password, 10),
+                    name: createUserDto.name
+                }
+            })
+
+            // Delete password from response
+            delete newUser.password
+
+            return newUser
+        } catch (error) {
+            // Check if email already registered
+            if (error.code === 'P2002') {
+                throw new ConflictException('Email already registered')
+            }
+
+            throw new HttpException(error, 500)
+        }
+    }
 
     // async loginUser
 
