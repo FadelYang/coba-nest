@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Request } from "@nestjs/common";
 import { User } from "@prisma/client";
+import { Public } from "src/common/decorators/public.decorator";
 import { UserService } from "src/core/services/users/users.services";
 import { CreateUserDto } from "src/modules/users/dtos/create-user.dto";
 import { LoginUserDto } from "src/modules/users/dtos/login-user.dto";
@@ -11,11 +12,13 @@ import { LoginResponse, UserPayload } from "src/modules/users/interfaces/users-l
 export class UsersController {
     constructor(private readonly userService: UserService) { }
 
+    @Public()
     @Post('register')
     async registerUser(@Body() createUserDto: CreateUserDto): Promise<User> {
         return this.userService.registerUser(createUserDto)
     }
 
+    @Public()
     @Post('login')
     loginUser(@Body() LoginUserDto: LoginUserDto): Promise<LoginResponse> {
         return this.userService.loginUser(LoginUserDto)
