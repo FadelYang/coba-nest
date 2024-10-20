@@ -1,9 +1,11 @@
-import { ConflictException, HttpException, Injectable } from "@nestjs/common"
+import { ConflictException, HttpException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common"
 import { User } from '@prisma/client'
 import { PrismaService } from "../prisma.service"
 import { CreateUserDto } from "src/modules/users/dtos/create-user.dto"
-import { hash } from "bcrypt"
+import { compare, hash } from "bcrypt"
 import { JwtService } from "@nestjs/jwt"
+import { LoginUserDto } from "src/modules/users/dtos/login-user.dto"
+import { LoginResponse, UserPayload } from "src/modules/users/interfaces/users-login-interface"
 
 @Injectable()
 export class UserService {
@@ -15,7 +17,6 @@ export class UserService {
     // async registerUser
     async registerUser(createUserDto: CreateUserDto): Promise<User> {
         try {
-            // Create new user using prisma client
             const newUser = await this.prisma.user.create({
                 data: {
                     email: createUserDto.email,
@@ -39,6 +40,33 @@ export class UserService {
     }
 
     // async loginUser
+    async loginUser(loginUserDto: LoginUserDto): Promise<LoginResponse> {
+        try {
+            const user = await this.prisma.user.findUnique({
+                where: { email: loginUserDto.email }
+            });
+
+            if (!user) {
+                throw new NotFoundException('User not found')
+            }
+
+            if (!(await compare(loginUserDto.password, user.password))) {
+                throw new UnauthorizedException('Invalid credentials')
+            }
+
+            const payload: UserPayload = {
+                sub: user.id,
+                email: user.email,
+                name: user.name
+            }
+
+            return {
+                access_token: await this.jwtService.signAsync(payload)
+            }
+        } catch (error) {
+            
+        }
+    }
 
     // async updateUser
 
