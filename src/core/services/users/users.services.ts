@@ -6,6 +6,7 @@ import { compare, hash } from "bcrypt"
 import { JwtService } from "@nestjs/jwt"
 import { LoginUserDto } from "src/modules/users/dtos/login-user.dto"
 import { LoginResponse, UserPayload } from "src/modules/users/interfaces/users-login-interface"
+import { UpdateUserDto } from "src/modules/users/dtos/update-user.dto"
 
 @Injectable()
 export class UserService {
@@ -14,7 +15,6 @@ export class UserService {
         private jwtService: JwtService
     ) { }
 
-    // async registerUser
     async registerUser(createUserDto: CreateUserDto): Promise<User> {
         try {
             const newUser = await this.prisma.user.create({
@@ -39,7 +39,6 @@ export class UserService {
         }
     }
 
-    // async loginUser
     async loginUser(loginUserDto: LoginUserDto): Promise<LoginResponse> {
         try {
             const user = await this.prisma.user.findUnique({
@@ -68,7 +67,37 @@ export class UserService {
         }
     }
 
-    // async updateUser
+    async UpdateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+        try {
+            await this.prisma.user.findUniqueOrThrow({
+                where: { id }
+            })
+
+            const updatedUser = await this.prisma.user.update({
+                where: { id },
+                data: {
+                    ...updateUserDto,
+                    ...(updateUserDto.password && {
+                        password: await hash(updateUserDto.password, 10)
+                    })
+                }
+            })
+
+            delete updatedUser.password
+
+            return updatedUser;
+        } catch (error) {
+            if (error.code === 'P2005') {
+                throw new NotFoundException(`User with id ${id} not found`)
+            }
+
+            if (error.code === 'P2002') {
+                throw new ConflictException('Email already registered')
+            }
+
+            throw new HttpException(error, 500)
+        }
+    }
 
     // async deleteUser
 }
