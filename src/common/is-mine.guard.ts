@@ -1,12 +1,28 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
-import { Observable } from "rxjs";
+import { PrismaService } from "src/cors/services/prisma.service";
 
 @Injectable()
 export class IsMineGuard implements CanActivate {
-    constructor() {}
+    constructor(private readonly prismaService: PrismaService) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest()
-        return parseInt(request.params.id) === request.user.sub
+
+        const route = request.route.path.split('/')[1];
+        const paramId = isNaN(parseInt(request.params.id)) ? 0 : parseInt(request.params.id)
+
+        switch (route) {
+            case 'posts':
+                const post = await this.prismaService.post.findFirst({
+                    where: {
+                        id: paramId,
+                        authorId: request.user.sub
+                    }
+                })
+
+                return paramId === post?.id
+            default:
+                return paramId === request.user.id
+        }
     }
 }
