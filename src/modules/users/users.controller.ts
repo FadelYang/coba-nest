@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Reques
 import { User } from "@prisma/client";
 import { Public } from "src/common/decorators/public.decorator";
 import { IsMineGuard } from "src/common/is-mine.guard";
-import { UserService } from "src/core/services/users/users.services";
+import { UserService } from "src/modules/users/users.services";
 import { CreateUserDto } from "src/modules/users/dtos/create-user.dto";
 import { LoginUserDto } from "src/modules/users/dtos/login-user.dto";
 import { UpdateUserDto } from "src/modules/users/dtos/update-user.dto";

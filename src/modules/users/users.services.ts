@@ -1,6 +1,6 @@
 import { ConflictException, HttpException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common"
 import { User } from '@prisma/client'
-import { PrismaService } from "../prisma.service"
+import { PrismaService } from "../../core/services/prisma.service"
 import { CreateUserDto } from "src/modules/users/dtos/create-user.dto"
 import { compare, hash } from "bcrypt"
 import { JwtService } from "@nestjs/jwt"
