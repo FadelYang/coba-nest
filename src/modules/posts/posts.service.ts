@@ -3,6 +3,8 @@ import { PrismaService } from "src/cors/services/prisma.service";
 import { CreatePostDto } from "./dtos/create-post.dto";
 import { Post } from "@prisma/client";
 import { UpdatePostDto } from "./dtos/update-post.dto";
+import { QueryPaginationDto } from "src/common/dtos/query-pagination.dto";
+import { paginate, paginateOutput, PaginateOutput } from "src/common/utils/pagination.utils";
 
 @Injectable()
 export class PostsService {
@@ -30,11 +32,16 @@ export class PostsService {
         }
     }
 
-    async getAllPosts(): Promise<Post[]> {
-        const posts = await this.prisma.post.findMany()
-
-        return posts
-    }
+    async getAllPosts(query?: QueryPaginationDto): Promise<PaginateOutput<Post>> {
+        const [posts, total] = await Promise.all([
+          await this.prisma.post.findMany({
+            ...paginate(query),
+          }),
+          await this.prisma.post.count(),
+        ]);
+      
+        return paginateOutput<Post>(posts, total, query);
+      }
 
     async getPostById(id: number): Promise<Post> {
         try {
